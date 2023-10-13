@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -13,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,17 +28,23 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,6 +97,14 @@ fun TopAppBar(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.displayLarge,
             )
         },
+        navigationIcon = {
+            IconButton(onClick = {}) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "Navigation Icon"
+                )
+            }
+        },
         modifier = modifier
     )
 }
@@ -138,11 +154,17 @@ fun HeroesList(
 @Composable
 fun HeroListItem(
     hero: Hero,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mediumShape: CutCornerShape = CutCornerShape(16.dp),
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+
     Card(
+        shape = mediumShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier,
+        modifier = modifier.clickable {
+            isExpanded = !isExpanded // Toggle expanded status on click
+        }
     ) {
         Row(
             modifier = Modifier
@@ -159,13 +181,18 @@ fun HeroListItem(
                     text = stringResource(hero.descriptionRes),
                     style = MaterialTheme.typography.bodyLarge
                 )
+                if (isExpanded) {
+                    Text( // This text will be shown when the card is clicked and is expanded
+                        text = stringResource(hero.vulRes),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
             Spacer(Modifier.width(16.dp))
             Box(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(8.dp))
-
             ) {
                 Image(
                     painter = painterResource(hero.imageRes),
@@ -185,7 +212,8 @@ fun HeroPreview() {
     val hero = Hero(
         R.string.hero1,
         R.string.description1,
-        R.drawable.android_superhero1
+        R.drawable.android_superhero1,
+        R.string.vuln1,
     )
     SuperheroesTheme {
         HeroListItem(hero = hero)
